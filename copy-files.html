@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Copy files from server</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+<h1>Copy files</h1>
+<div id="progress"></div>
+<div id="log"></div>
+
+<script>
+$(document).ready(function() {
+    // Function to start copying images
+    function startCopyingImages() {
+        // Get the image paths from the text file
+        $.get('list_files.txt', function(data) {
+            
+            var lines = data.split('\n');
+            var total = lines.length;
+            var copied = 0;
+
+            // Recursive function to copy the images
+            function copyNext() {
+                if (copied >= total) {
+                    // If all images have been copied, show message and stop the process
+                    $('#progress').text('Copying process finished.');
+                    return;
+                }
+
+                // Get the current image path
+                var imagePath = lines[copied].trim();
+
+                // Send the path to the server to copy the image
+                $.ajax({
+                    url: 'copy_image.php',
+                    method: 'POST',
+                    data: { imagePath: imagePath },
+                    success: function(data) {
+                        // Update the progress and log
+                        $('#progress').text(data.progress);
+                        $('#log').append(data.log);
+
+                        // Increment the copied images count
+                        copied++;
+
+                        // Call the function recursively to copy the next image
+                        copyNext();
+                    },
+                    dataType: 'json'
+                });
+            }
+
+            // Start the process of copying images
+            copyNext();
+        });
+    }
+
+    // Start copying images when the page loads
+    startCopyingImages();
+});
+</script>
+</body>
+</html>

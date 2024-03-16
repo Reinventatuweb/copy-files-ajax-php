@@ -1,0 +1,3 @@
+/dir/image-1.jpg
+/dir/image-2.jpg
+/dir/image-3.jpg
