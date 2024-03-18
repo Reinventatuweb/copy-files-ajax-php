@@ -8,58 +8,84 @@
 </head>
 <body>
 <h1>Copy files</h1>
+<button id="pauseResumeBtn">Start</button>
 <div id="progress"></div>
 <div id="log"></div>
 
+
 <script>
 $(document).ready(function() {
-    // Function to start copying images
-    function startCopyingImages() {
-        // Get the image paths from the text file
+    var start = false;
+    var paused = true; // Flag to track whether copying process is paused
+
+    // Function to start copying files
+    function startCopyingfiles() {
+        // Get the file paths from the text file
         $.get('list_files.txt', function(data) {
             
             var lines = data.split('\n');
             var total = lines.length;
             var copied = 0;
+            var progressPercentage = 0;
 
-            // Recursive function to copy the images
+            // Recursive function to copy the files
             function copyNext() {
                 if (copied >= total) {
-                    // If all images have been copied, show message and stop the process
+                    // If all files have been copied, show message and stop the process
                     $('#progress').text('Copying process finished.');
                     return;
                 }
 
-                // Get the current image path
-                var imagePath = lines[copied].trim();
+                // Get the current file path
+                var filePath = lines[copied].trim();
 
-                // Send the path to the server to copy the image
+                // Send the path to the server to copy the file
                 $.ajax({
-                    url: 'copy_image.php',
+                    url: 'copy-file.php',
                     method: 'POST',
-                    data: { imagePath: imagePath },
+                    data: { filePath: filePath },
                     success: function(data) {
-                        // Update the progress and log
-                        $('#progress').text(data.progress);
-                        $('#log').append(data.log);
 
-                        // Increment the copied images count
                         copied++;
 
-                        // Call the function recursively to copy the next image
-                        copyNext();
+                        // Calculate copying progress in percentage
+                        progressPercentage = Math.round((copied / total) * 100);
+
+                        $('#progress').text("Progress: "+copied+"/"+total+" "+progressPercentage+"%");
+                        $('#log').append(data.log);
+
+                        // Check if the process is paused
+                        if (!paused) {
+                            // Call the function recursively to copy the next file
+                            copyNext();
+                        }
                     },
                     dataType: 'json'
                 });
             }
 
-            // Start the process of copying images
+            // Start the process of copying files
             copyNext();
         });
     }
 
-    // Start copying images when the page loads
-    startCopyingImages();
+    // Start copying files when the page loads
+    
+
+    // Button click event to pause/resume the copying process
+    $('#pauseResumeBtn').click(function() {
+
+        if(!start){
+            startCopyingfiles();
+            start = true;
+        }
+
+        if(start){
+            paused = !paused; // Toggle the paused state
+            $(this).text(paused ? 'Resume' : 'Pause'); // Update the button text
+        }
+        
+    });
 });
 </script>
 </body>

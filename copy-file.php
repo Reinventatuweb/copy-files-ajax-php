@@ -3,36 +3,36 @@
 $destinationFolder = '/dir';
 
 // Get the image path from the POST request
-$imagePath = $_POST['imagePath'];
+$filePath = $_POST['filePath'];
 
 // Get the file name
-$fileName = basename($imagePath);
+$fileName = basename($filePath);
 
 // Generate the full path of the file in the destination folder
 $fullDestinationPath = $destinationFolder . '/' . $fileName;
 
-// Initialize progress and log variables
-$progress = '';
+// Initialize log variable
 $log = '';
+$status = '';
 
 // Check if the file already exists in the destination folder
 if (!file_exists($fullDestinationPath)) {
     // Copy the image to the destination
-    if (copy($imagePath, $fullDestinationPath)) {
-        $progress = 'Image copied';
-        $log = "Image copied: $fileName<br>";
+    if (copy($filePath, $fullDestinationPath)) {
+        $log = "File copied: $fileName<br>";
+        $status = "copied";
     } else {
-        $progress = 'Error copying the image';
-        $log = "Error copying the image: $fileName<br>";
+        $log = "Error copying the file: $fileName<br>";
+        $status = "error";
     }
 } else {
-    $progress = 'Image already exists';
-    $log = "Image already exists: $fileName<br>";
+    $log = "File already exists: $fileName<br>";
+    $status = "exist";
 }
 
 // Return the data as AJAX response
 echo json_encode(array(
-    'progress' => $progress,
-    'log' => $log
+    'log' => $log,
+    'status' => $status
 ));
 ?>
